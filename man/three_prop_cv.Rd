@@ -36,6 +36,12 @@ alpha associated to those features.
 Additionally, the function returns computes the area under the ROC curve
 (AUROC) for every fold in the outer CV loop.
 }
+\examples{
+sim_SBM = simulate_simple_SBM(25L, 0.2, 0.001, 0.25)
+M = normalize_A(sim_SBM$A, "asym")
+three_prop_cv(M=M, y=sim_SBM$y)
+
+}
 \references{
 Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
 three degrees of propagation. \emph{PloS one, 7}(12), e51947.

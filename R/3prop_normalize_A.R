@@ -17,7 +17,7 @@
 #' @param M_type a character string with one of "asym", "sym", or "as_is" (see
 #' details).
 #'
-#' @return a normalized affinity matrix.
+#' @return A normalized affinity matrix.
 #'
 #' @examples
 #' # simulate_simple_SBM does not produce self connections

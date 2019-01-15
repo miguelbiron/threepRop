@@ -23,6 +23,11 @@
 #' containing the weights estimated for each (outer) CV iteration, and a vector
 #' of length \code{n_folds} containing the AUROC for each such iteration.
 #'
+#' @examples
+#' sim_SBM = simulate_simple_SBM(25L, 0.2, 0.001, 0.25)
+#' M = normalize_A(sim_SBM$A, "asym")
+#' three_prop_cv(M=M, y=sim_SBM$y)
+#'
 #' @references
 #' Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
 #' three degrees of propagation. \emph{PloS one, 7}(12), e51947.
@@ -39,15 +44,15 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
   M_powers[[1L]] = M
   for(r in 2L:R){ M_powers[[r]] = M %*% M_powers[[r-1L]]}
 
-  # sample a random partition of 1:n into num_folds subsets
-  fold_id = sample.int(num_folds, size = n, replace = TRUE)
+  # sample a random partition of 1:n into n_folds subsets
+  fold_id = sample.int(n_folds, size = n, replace = TRUE)
 
   # define storage for things to output
-  alpha_mat = matrix(nrow = R, ncol = num_folds)
-  AUROC_vec = numeric(num_folds)
+  alpha_mat = matrix(nrow = R, ncol = n_folds)
+  AUROC_vec = numeric(n_folds)
 
   # loop folds
-  for(j in seq_len(num_folds)){
+  for(j in seq_len(n_folds)){
     ind = which(fold_id == j) # which observations are in the current fold
 
     # copy y but set to zero labels for current fold
@@ -58,7 +63,7 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
     neg = setdiff(ind_all, c(pos, ind)) # non-positives not in current test set
 
     # estimate coefficients
-    alpha = est_weights_lda_cv(M_powers=M_powers, y=y_cv, pos=pos, neg=neg)
+    alpha = est_weights_lda_cv(M_powers=M_powers, y=y_cv, pos=pos, neg=neg, n_folds=n_folds)
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 
     # compute scores using loop to avoid creating X explicitly

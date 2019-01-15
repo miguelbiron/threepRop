@@ -13,7 +13,7 @@
 #' @param warn_inv raises a warning if high values of \code{p} are associated
 #' with the 0 label, which produces an AUROC lower than 0.5.
 #'
-#' @return the value of the AUROC.
+#' @return The value of the AUROC.
 #'
 #' @export
 AUROC = function(p, y, plot_roc = TRUE, warn_inv = TRUE){

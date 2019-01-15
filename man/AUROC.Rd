@@ -19,7 +19,7 @@ will be coerced to dense.}
 with the 0 label, which produces an AUROC lower than 0.5.}
 }
 \value{
-the value of the AUROC.
+The value of the AUROC.
 }
 \description{
 Function for computing the area under the ROC curve (AUROC)
