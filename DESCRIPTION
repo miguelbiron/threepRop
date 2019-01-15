@@ -1,0 +1,12 @@
+Package: threepRop
+Type: Package
+Title: R Implementation of the 3prop Label Propagation Algorithm
+Version: 0.0.0.9000
+Author: Miguel Biron
+Maintainer: Miguel Biron <miguel.biron@stat.ubc.ca>
+Description: R Implementation of the 3prop Label Propagation Algorithm
+Imports: Matrix
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
