@@ -4,7 +4,8 @@ Title: R Implementation of the 3prop Label Propagation Algorithm
 Version: 0.0.0.9000
 Author: Miguel Biron
 Maintainer: Miguel Biron <miguel.biron@stat.ubc.ca>
-Description: R Implementation of the 3prop Label Propagation Algorithm
+Description: This is a port of the MATLAB code provided by the authors of the
+    3prop paper.
 Imports: Matrix
 License: MIT
 Encoding: UTF-8

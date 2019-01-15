@@ -2,7 +2,7 @@
 
 ## Description
 
-R implementation of the algorithm proposed by Mostafavi et al. (2012).
+R implementation of the algorithm proposed by Mostafavi et al. (2012). This is a port of the MATLAB code provided by the authors, available [here](http://ai.stanford.edu/~saram/3propcode.zip).
 
 ## Installation
 
