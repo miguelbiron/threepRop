@@ -4,6 +4,7 @@ est_weights_lda_cv = function(M_powers, y, pos, neg, n_folds = 3L){
   # pos: indices of positive instances in y which are not in the outer CV fold
   # neg: indices of non-positive instances which are not in the outer CV fold
   # n_folds: number of CV folds
+  # OUTPUT: vector of alpha coefficients (length R)
 
   n = length(y); R = length(M_powers)
 
@@ -30,13 +31,14 @@ est_weights_lda_cv = function(M_powers, y, pos, neg, n_folds = 3L){
     )
 
     # compute cov, allowing for sparse X
-    # note: does not consider all nodes
+    # uses only nodes in this fold but not in the outer fold
     C = cov_sparse(X[c(ind_test_pos, ind_test_neg),])
 
-    # compute alpha
+    # compute averages for covariates in pos and neg sets
+    # uses only nodes in this fold but not in the outer fold
     x_p = Matrix::colMeans(X[ind_test_pos,])
     x_n = Matrix::colMeans(X[ind_test_neg,])
-    alpha_mat[,k] = solve(C) %*% (x_p - x_n)
+    alpha_mat[,k] = solve(C) %*% (x_p - x_n) # compute alpha
 
   }
   return(rowMeans(alpha_mat))

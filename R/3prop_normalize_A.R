@@ -8,8 +8,7 @@
 #'     \item{asym}{asymmetric normalization, which yields a singly stochastic
 #'     matrix, where rows add to 1.}
 #'     \item{sym}{symmetric normalization, yielding a symmetric matrix.}
-#'     \item{rm_diag}{simply returns \code{A} without doing anything else than
-#'     removing possible diagonal elements.}
+#'     \item{rm_diag}{only removes possible diagonal elements.}
 #' }
 #'
 #' @param A a symmetric affinity matrix. Can be dense or sparse from package
@@ -34,7 +33,7 @@ normalize_A = function(A, M_type){
   if(!Matrix::isSymmetric(A)){stop("Matrix A is not symmetric.")}
 
   # remove diagonal elements
-  M = A - Matrix::diag(Matrix::diag(A))
+  M = A - Matrix::Diagonal(x = Matrix::diag(A))
 
   # normalize using chosen method
   switch(

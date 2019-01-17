@@ -63,7 +63,13 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
     neg = setdiff(ind_all, c(pos, ind)) # non-positives not in current test set
 
     # estimate coefficients
-    alpha = est_weights_lda_cv(M_powers=M_powers, y=y_cv, pos=pos, neg=neg, n_folds=n_folds)
+    alpha = est_weights_lda_cv(
+      M_powers = M_powers,
+      y        = y_cv,
+      pos      = pos,
+      neg      = neg,
+      n_folds  = n_folds
+    )
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 
     # # compute scores using loop to avoid creating X explicitly

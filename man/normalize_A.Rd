@@ -26,8 +26,7 @@ The available methods are:
     \item{asym}{asymmetric normalization, which yields a singly stochastic
     matrix, where rows add to 1.}
     \item{sym}{symmetric normalization, yielding a symmetric matrix.}
-    \item{rm_diag}{simply returns \code{A} without doing anything else than
-    removing possible diagonal elements.}
+    \item{rm_diag}{only removes possible diagonal elements.}
 }
 }
 \examples{
