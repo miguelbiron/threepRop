@@ -59,19 +59,27 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
     y_cv = y; y_cv[ind] = 0
 
     # define relevant indices
-    pos = which(y_cv > 0) # positives not in current test set
+    pos = Matrix::which(y_cv > 0) # positives not in current test set
     neg = setdiff(ind_all, c(pos, ind)) # non-positives not in current test set
 
     # estimate coefficients
     alpha = est_weights_lda_cv(M_powers=M_powers, y=y_cv, pos=pos, neg=neg, n_folds=n_folds)
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 
-    # compute scores using loop to avoid creating X explicitly
-    # using a loop shouldn't be a problem, since R is very small (3 for 3prop)
-    f_scores = 0*y # create empty vector of the same type as y (dense or sparse)
-    for(r in seq_len(R)){
-      f_scores = f_scores + alpha_mat[r, j]*(M_powers[[r]] %*% y_cv)
-    }
+    # # compute scores using loop to avoid creating X explicitly
+    # # using a loop shouldn't be a problem, since R is very small (3 for 3prop)
+    # f_scores = 0*y # create empty vector of the same type as y (dense or sparse)
+    # for(r in seq_len(R)){
+    #   f_scores = f_scores + alpha_mat[r, j]*(M_powers[[r]] %*% y_cv)
+    # }
+
+    # compute X
+    X = do.call(cbind,
+                lapply(M_powers, FUN = function(B){B %*% y_cv})
+                )
+
+    # compute f_score and convert to vector
+    f_scores = as.vector(X %*% alpha_mat[, j])
 
     # compute AUROC
     AUROC_vec[j] = AUROC(p=f_scores[ind], y=y[ind], plot_roc=FALSE, warn_inv=FALSE)

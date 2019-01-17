@@ -5,8 +5,10 @@ Version: 0.0.0.9000
 Author: Miguel Biron
 Maintainer: Miguel Biron <miguel.biron@stat.ubc.ca>
 Description: This is a port of the MATLAB code provided by the authors of the
-    3prop paper.
-Imports: Matrix
+    3prop paper. It also provides a function to efficiently simulate Stochastic
+    Block Models for two classes. Additionally, it contains a utiliy function
+    to calculate the area under the ROC curve (AUROC) for assesing performance.
+Depends: Matrix
 License: MIT
 Encoding: UTF-8
 LazyData: true

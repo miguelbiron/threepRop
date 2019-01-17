@@ -31,10 +31,10 @@
 #' @export
 normalize_A = function(A, M_type){
 
-  if(!isSymmetric(A)){stop("Matrix A is not symmetric.")}
+  if(!Matrix::isSymmetric(A)){stop("Matrix A is not symmetric.")}
 
   # remove diagonal elements
-  M = A - diag(diag(A))
+  M = A - Matrix::diag(Matrix::diag(A))
 
   # normalize using chosen method
   M = switch(
@@ -51,7 +51,7 @@ normalize_A = function(A, M_type){
 #######################################
 
 get_sym_M = function(A){
-  d = rowSums(A)
+  d = Matrix::rowSums(A)
   d = ifelse(d == 0, 1, d) # do not alter rows/columns (A is sym) which sum to 0
   d_inv_sqrt = 1/sqrt(d)
 
@@ -79,12 +79,12 @@ get_sym_M = function(A){
 # # test
 # n = 500L
 # A = matrix(runif(n*n), nrow = n)
-# D_inv_sqrt = diag(1/sqrt(rowSums(A)))
+# D_inv_sqrt = diag(1/sqrt(Matrix::rowSums(A)))
 # all.equal(get_sym_M(A), D_inv_sqrt %*% A %*% D_inv_sqrt)
 # microbenchmark::microbenchmark(
 #   sweep  = {get_sym_M(A)},
 #   matrix = {
-#     D_inv_sqrt = diag(1/sqrt(rowSums(A)))
+#     D_inv_sqrt = diag(1/sqrt(Matrix::rowSums(A)))
 #     D_inv_sqrt %*% A %*% D_inv_sqrt
 #   }
 # ) # sweep version about 40 times faster for n=500L (for smaller n they are =)
@@ -94,7 +94,7 @@ get_sym_M = function(A){
 #######################################
 
 get_asym_M = function(A){
-  d = rowSums(A)
+  d = Matrix::rowSums(A)
   d = ifelse(d == 0, 1, d) # do not alter rows which sum to 0
   # normalize rows to sum to 1
   M = sweep(
@@ -110,9 +110,9 @@ get_asym_M = function(A){
 # # test
 # n = 500L
 # A = matrix(runif(n*n), nrow = n)
-# all.equal(c(1,1), range(rowSums(get_asym_M(A)))) # check it's a Markov transition matrix
-# all.equal(get_asym_M(A), diag(1/rowSums(A)) %*% A)
+# all.equal(c(1,1), range(Matrix::rowSums(get_asym_M(A)))) # check it's a Markov transition matrix
+# all.equal(get_asym_M(A), diag(1/Matrix::rowSums(A)) %*% A)
 # microbenchmark::microbenchmark(
 #   sweep  = {get_asym_M(A)},
-#   matrix = {diag(1/rowSums(A)) %*% A}
+#   matrix = {diag(1/Matrix::rowSums(A)) %*% A}
 # ) # sweep version about 25 times faster for n=500L (for smaller n they are =)
