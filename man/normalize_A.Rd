@@ -14,7 +14,7 @@ normalize_A(A, M_type)
 details).}
 }
 \value{
-A normalized affinity matrix.
+A sparse normalized affinity matrix.
 }
 \description{
 This function provides different modes of normalizing an affinity matrix.

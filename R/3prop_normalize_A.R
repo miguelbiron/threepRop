@@ -17,7 +17,7 @@
 #' @param M_type a character string with one of "asym", "sym", or "as_is" (see
 #' details).
 #'
-#' @return A normalized affinity matrix.
+#' @return A sparse normalized affinity matrix.
 #'
 #' @examples
 #' # simulate_simple_SBM does not produce self connections
@@ -37,13 +37,14 @@ normalize_A = function(A, M_type){
   M = A - Matrix::diag(Matrix::diag(A))
 
   # normalize using chosen method
-  M = switch(
+  switch(
     EXPR    = M_type,
     asym    = get_asym_M(M),
     sym     = get_sym_M(M),
     rm_diag = M,
     stop(sprintf("'%s' is an unrecognized type of normalization", M_type))
   )
+
 }
 
 #######################################
@@ -53,41 +54,9 @@ normalize_A = function(A, M_type){
 get_sym_M = function(A){
   d = Matrix::rowSums(A)
   d = ifelse(d == 0, 1, d) # do not alter rows/columns (A is sym) which sum to 0
-  d_inv_sqrt = 1/sqrt(d)
-
-  # multiply each row
-  M = sweep(
-    x      = A,
-    MARGIN = 1L,
-    STATS  = d_inv_sqrt,
-    FUN    = "*",
-    check.margin = FALSE
-  )
-
-  # multiply each column
-  M = sweep(
-    x      = M,
-    MARGIN = 2L,
-    STATS  = d_inv_sqrt,
-    FUN    = "*",
-    check.margin = FALSE
-  )
-
-  return(M)
+  D_inv_sq = Matrix::Diagonal(x = 1/sqrt(d))
+  return(D_inv_sq %*% A %*% D_inv_sq)
 }
-
-# # test
-# n = 500L
-# A = matrix(runif(n*n), nrow = n)
-# D_inv_sqrt = diag(1/sqrt(Matrix::rowSums(A)))
-# all.equal(get_sym_M(A), D_inv_sqrt %*% A %*% D_inv_sqrt)
-# microbenchmark::microbenchmark(
-#   sweep  = {get_sym_M(A)},
-#   matrix = {
-#     D_inv_sqrt = diag(1/sqrt(Matrix::rowSums(A)))
-#     D_inv_sqrt %*% A %*% D_inv_sqrt
-#   }
-# ) # sweep version about 40 times faster for n=500L (for smaller n they are =)
 
 #######################################
 # asymmetric variant (P)
@@ -96,23 +65,5 @@ get_sym_M = function(A){
 get_asym_M = function(A){
   d = Matrix::rowSums(A)
   d = ifelse(d == 0, 1, d) # do not alter rows which sum to 0
-  # normalize rows to sum to 1
-  M = sweep(
-    x      = A,
-    MARGIN = 1L,
-    STATS  = 1 / d,
-    FUN    = "*",
-    check.margin = FALSE
-  )
-  return(M)
+  return(Matrix::Diagonal(x = 1/d) %*% A)
 }
-
-# # test
-# n = 500L
-# A = matrix(runif(n*n), nrow = n)
-# all.equal(c(1,1), range(Matrix::rowSums(get_asym_M(A)))) # check it's a Markov transition matrix
-# all.equal(get_asym_M(A), diag(1/Matrix::rowSums(A)) %*% A)
-# microbenchmark::microbenchmark(
-#   sweep  = {get_asym_M(A)},
-#   matrix = {diag(1/Matrix::rowSums(A)) %*% A}
-# ) # sweep version about 25 times faster for n=500L (for smaller n they are =)
