@@ -124,22 +124,15 @@ get_coords = function(n, m, u){
 # get coordinates of matrix elements given indices of entries
 # in the lower triangle, indexed by scanning rows
 get_coords_sym = function(n, u){
-  u = sort(u)
-  l_u = length(u)
-  res = matrix(integer(l_u*2L), ncol = 2L)
-  u_i = 1L
-  k = 0L
-
-  for(i in 2L:n){
-    for(j in seq_len(i-1L)){
-      k = k + 1L
-      if(u[u_i] == k) {
-        res[u_i, ] = c(i, j)
-        u_i = u_i + 1L
-        if(u_i > l_u) {return(res)}
-      }
-    }
+  v = cumsum((n-1L):1L)
+  res = matrix(0L, nrow = length(u), ncol = 2L)
+  for(k in seq_along(u)){
+    d = u[k] - v
+    j = which.min(abs(d))
+    if(d[j]>0L) j=j+1L
+    res[k,] = c(n + d[j], j)
   }
+  return(res)
 }
 
 # # test

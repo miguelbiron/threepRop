@@ -8,10 +8,10 @@ three_prop_cv(M, y, R = 3L, n_folds = 3L)
 }
 \arguments{
 \item{M}{normalized affinity matrix, as returned by \code{normalize_A()}, of
-size \code{N x N}. Can be dense or sparse from package \code{Matrix}.}
+size \code{N x N}. Must be of class \code{sparseMatrix}.}
 
-\item{y}{vector of labels, of length \code{N}. Can be dense or sparse from
-package \code{Matrix}.}
+\item{y}{vector of labels, of length \code{N}. Must be of class
+\code{sparseVector}.}
 
 \item{R}{maximum length of the random walks to consider. The default 3 is the
 usual for 3prop.}
