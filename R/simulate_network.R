@@ -7,36 +7,58 @@
 #' while the probability is \code{p_s} if they have matching labels. In the
 #' language of the SBM, the matrix of edge probabilities is completely specified
 #' by one number associated with the diagonal (\code{p_s}), and another for the
-#' off-diagonal elements (\code{p_d}),
+#' off-diagonal elements (\code{p_d}).
+#'
+#' In spite of the above, the preferred way of specifying the model is by the
+#' tuple \code{(N, p_1, D, p_d)}, where \code{D} is the expected density of the
+#' network, because this allows us to separate the properties of sparseness and
+#' assortativeness into two different parameters: \code{D} for the former, and
+#' \code{p_d} for the latter.
 #'
 #' Note that this implementation takes advantage of the structure of the SBM
 #' to efficiently sample sparse random objects. One consequence of this is that
 #' the elements of \code{y} are ordered, starting with all the positive nodes,
-#' and then all the non-positives. The same happens with \code{A}. If this is
-#' an issue, the user can always permute the rows of the results.
+#' and then all the non-positives. The same happens with \code{A}, which is
+#' partitioned into according blocks. If this is an issue, the user can always
+#' permute the elements of \code{y} and \code{A} in a random but consistent
+#' fashion.
 #'
 #' @param N number of nodes.
 #' @param p_1 probability of a node being labelled as 1.
-#' @param p_s probability of an edge existing between nodes with equal labels.
+#' @param D expected density of the network.
 #' @param p_d probability of an edge existing between nodes with different
-#' labels.
+#' @param p_s (optional) probability of an edge existing between nodes with
+#' equal labels. If supplied, \code{D} is ignored.
 #'
 #' @return a named list with \code{y} being a sparse vector of labels, and
 #' \code{A} a sparse adjacency matrix.
 #'
 #' @examples
-#' res = simulate_simple_SBM(25L, 0.2, 0.001, 0.25)
+#' res = simulate_simple_SBM(N=25L, p_1=0.2, D = 0.1, p_d = 0.25)
 #' str(res)
+#' res2 = simulate_simple_SBM(N=25L, p_1=0.2, p_s = 0.001, p_d = 0.25)
+#' str(res2)
+#' \dontrun{
+#' # invalid combination of parameters: produces p_s < 0
+#' simulate_simple_SBM(N=25L, p_1=0.2, D = 0.001, p_d = 0.25)
+#' }
 #'
 #' @references
 #' Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
 #' three degrees of propagation. \emph{PloS one, 7}(12), e51947.
 #'
 #' @export
-simulate_simple_SBM = function(N, p_1, p_s, p_d, verb = FALSE){
+simulate_simple_SBM = function(N, p_1, D, p_d, p_s=NULL, verb = FALSE){
 
-  # sanity checks
-  stopifnot(0 <= p_1 && p_1 <= 1 && 0 <= p_s && p_s <= 1 && 0 <= p_d && p_d <= 1)
+  # compute p_s and perform sanity checks
+  if(is.null(p_s)){
+    p_s = (D - 2*p_d*p_1*(1-p_1)) / (p_1^2 + (1-p_1)^2)
+    if(p_s < 0 || p_s > 1) {
+      stop(sprintf("Parameters supplied produce an invalid p_s=%.2f", p_s))
+    }
+  }
+
+  stopifnot(0 <= p_1 && p_1 <= 1 && 0 <= p_d && p_d <= 1 && 0 <= p_s && p_s <= 1)
 
   # sample labels
   n_pos = rbinom(n = 1L, size = N, prob = p_1) # sample number of positives
@@ -115,14 +137,13 @@ build_A_xx = function(n_x, p_edge){
 }
 
 
-# get coordinates of matrix elements given indices of entries
-# scanned row-wise
+# get coordinates of matrix elements given indices of entries scanned row-wise
 get_coords = function(n, m, u){
   cbind((u-1L) %/% m + 1L, (u-1L) %% m + 1L)
 }
 
-# get coordinates of matrix elements given indices of entries
-# in the lower triangle, indexed by scanning rows
+# get coordinates of elements in a symmetric matrix, given indices of entries
+# in the lower triangle indexed by scanning columns
 get_coords_sym = function(n, u){
   v = cumsum((n-1L):1L)
   res = matrix(0L, nrow = length(u), ncol = 2L)
@@ -134,7 +155,3 @@ get_coords_sym = function(n, u){
   }
   return(res)
 }
-
-# # test
-# get_coords(n=5L, u=sample(seq_len(10L)))
-
