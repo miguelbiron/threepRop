@@ -4,19 +4,25 @@
 \alias{simulate_simple_SBM}
 \title{Simulate simplified Stochastic Block Model}
 \usage{
-simulate_simple_SBM(N, p_1, D, p_d, p_s = NULL, verb = FALSE)
+simulate_simple_SBM(N, p_1, D, R, p_d = NULL, p_s = NULL,
+  verb = FALSE)
 }
 \arguments{
 \item{N}{number of nodes.}
 
 \item{p_1}{probability of a node being labelled as 1.}
 
-\item{D}{expected density of the network.}
+\item{D}{expected density of the network, between 0 and 1.}
 
-\item{p_d}{probability of an edge existing between nodes with different}
+\item{R}{assortativeness parameter (non-negative). See Details.}
 
-\item{p_s}{(optional) probability of an edge existing between nodes with
-equal labels. If supplied, \code{D} is ignored.}
+\item{p_d}{(alternative parameterization) probability of an edge existing
+between nodes with different labels (see Details).}
+
+\item{p_s}{(alternative parameterization) probability of an edge existing
+between nodes with equal labels (see Details).}
+
+\item{verb}{prints minor details about the simulation.}
 }
 \value{
 a named list with \code{y} being a sparse vector of labels, and
@@ -34,10 +40,14 @@ by one number associated with the diagonal (\code{p_s}), and another for the
 off-diagonal elements (\code{p_d}).
 
 In spite of the above, the preferred way of specifying the model is by the
-tuple \code{(N, p_1, D, p_d)}, where \code{D} is the expected density of the
-network, because this allows us to separate the properties of sparseness and
-assortativeness into two different parameters: \code{D} for the former, and
-\code{p_d} for the latter.
+tuple \code{(N, p_1, D, R)}, where \code{D} is the expected density of the
+network (between 0 and 1), and \code{R} (non-negative) controls its
+assortativeness: for \code{R>1}, links are more common between pairs of nodes
+with equal labels (assortative network). For \code{R<1}, the opposite is true
+(disassortative network).
+
+The use can choose between supplying \code{(N, p_1, D, R)} or
+\code{(N, p_1, p_s, p_d)}, but they cannot be mixed.
 
 Note that this implementation takes advantage of the structure of the SBM
 to efficiently sample sparse random objects. One consequence of this is that
@@ -48,17 +58,13 @@ permute the elements of \code{y} and \code{A} in a random but consistent
 fashion.
 }
 \examples{
-res = simulate_simple_SBM(N=25L, p_1=0.2, D = 0.1, p_d = 0.25)
+res = simulate_simple_SBM(N=25L, p_1=0.2, D = 0.1, R = 0.25)
 str(res)
 res2 = simulate_simple_SBM(N=25L, p_1=0.2, p_s = 0.001, p_d = 0.25)
 str(res2)
 \dontrun{
-# invalid combination of parameters: produces p_s < 0
-simulate_simple_SBM(N=25L, p_1=0.2, D = 0.001, p_d = 0.25)
+    # invalid combination of parameterizations
+    simulate_simple_SBM(N=25L, p_1=0.2, D = 0.001, p_d = 0.25)
 }
 
-}
-\references{
-Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
-three degrees of propagation. \emph{PloS one, 7}(12), e51947.
 }

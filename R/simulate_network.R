@@ -10,10 +10,14 @@
 #' off-diagonal elements (\code{p_d}).
 #'
 #' In spite of the above, the preferred way of specifying the model is by the
-#' tuple \code{(N, p_1, D, p_d)}, where \code{D} is the expected density of the
-#' network, because this allows us to separate the properties of sparseness and
-#' assortativeness into two different parameters: \code{D} for the former, and
-#' \code{p_d} for the latter.
+#' tuple \code{(N, p_1, D, R)}, where \code{D} is the expected density of the
+#' network (between 0 and 1), and \code{R} (non-negative) controls its
+#' assortativeness: for \code{R>1}, links are more common between pairs of nodes
+#' with equal labels (assortative network). For \code{R<1}, the opposite is true
+#' (disassortative network).
+#'
+#' The use can choose between supplying \code{(N, p_1, D, R)} or
+#' \code{(N, p_1, p_s, p_d)}, but they cannot be mixed.
 #'
 #' Note that this implementation takes advantage of the structure of the SBM
 #' to efficiently sample sparse random objects. One consequence of this is that
@@ -25,39 +29,37 @@
 #'
 #' @param N number of nodes.
 #' @param p_1 probability of a node being labelled as 1.
-#' @param D expected density of the network.
-#' @param p_d probability of an edge existing between nodes with different
-#' @param p_s (optional) probability of an edge existing between nodes with
-#' equal labels. If supplied, \code{D} is ignored.
+#' @param D expected density of the network, between 0 and 1.
+#' @param R assortativeness parameter (non-negative). See Details.
+#' @param p_d (alternative parameterization) probability of an edge existing
+#' between nodes with different labels (see Details).
+#' @param p_s (alternative parameterization) probability of an edge existing
+#' between nodes with equal labels (see Details).
+#' @param verb prints minor details about the simulation.
 #'
 #' @return a named list with \code{y} being a sparse vector of labels, and
 #' \code{A} a sparse adjacency matrix.
 #'
 #' @examples
-#' res = simulate_simple_SBM(N=25L, p_1=0.2, D = 0.1, p_d = 0.25)
+#' res = simulate_simple_SBM(N=25L, p_1=0.2, D = 0.1, R = 0.25)
 #' str(res)
 #' res2 = simulate_simple_SBM(N=25L, p_1=0.2, p_s = 0.001, p_d = 0.25)
 #' str(res2)
 #' \dontrun{
-#' # invalid combination of parameters: produces p_s < 0
-#' simulate_simple_SBM(N=25L, p_1=0.2, D = 0.001, p_d = 0.25)
+#'     # invalid combination of parameterizations
+#'     simulate_simple_SBM(N=25L, p_1=0.2, D = 0.001, p_d = 0.25)
 #' }
 #'
-#' @references
-#' Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
-#' three degrees of propagation. \emph{PloS one, 7}(12), e51947.
-#'
 #' @export
-simulate_simple_SBM = function(N, p_1, D, p_d, p_s=NULL, verb = FALSE){
+simulate_simple_SBM = function(N, p_1, D, R, p_d=NULL, p_s=NULL, verb = FALSE){
 
-  # compute p_s and perform sanity checks
-  if(is.null(p_s)){
-    p_s = (D - 2*p_d*p_1*(1-p_1)) / (p_1^2 + (1-p_1)^2)
-    if(p_s < 0 || p_s > 1) {
-      stop(sprintf("Parameters supplied produce an invalid p_s=%.2f", p_s))
-    }
+  # compute p_s and p_d if D and R are supplied
+  if(is.null(p_s) && is.null(p_d)){
+    p_s = (D*R)/((p_1^2 + (1-p_1)^2)*(1 + R))
+    p_d = D/(2*p_1*(1-p_1)*(1 + R))
   }
 
+  # sanity checks
   stopifnot(0 <= p_1 && p_1 <= 1 && 0 <= p_d && p_d <= 1 && 0 <= p_s && p_s <= 1)
 
   # sample labels
@@ -93,20 +95,6 @@ simulate_simple_SBM = function(N, p_1, D, p_d, p_s=NULL, verb = FALSE){
   return(list(A=as(A, "dsCMatrix"), y=as(y, "dsparseVector")))
 
 }
-
-# # test
-# N = 30L
-# p_1 = 0.5
-# p_s = 0.00
-# p_d = 0.3
-# res = simulate_simple_SBM(N=N, p_1=p_1, p_s=p_s, p_d=p_d)
-#
-# G = igraph::graph_from_adjacency_matrix(adjmatrix = res$A,mode = "undirected")
-# G = igraph::set_vertex_attr(G,name = "color", value = as.vector(res$y))
-#
-# op = par(mar = rep(0,4))
-# plot(x = G, vertex.label = NA)
-# par(op)
 
 ###############################################################################
 # utils
