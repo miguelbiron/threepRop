@@ -1,12 +1,12 @@
-est_weights_lda_cv = function(M_powers, y, pos, neg, n_folds = 3L){
-  # M_powers: list of powers of M (length R)
+est_weights_lda_cv = function(M, R, y, pos, neg, n_folds = 3L){
+  # M: sparseMatrix of size N times N
   # y : labels in {0,1}, with components of outer CV zeroed
   # pos: indices of positive instances in y which are not in the outer CV fold
   # neg: indices of non-positive instances which are not in the outer CV fold
   # n_folds: number of CV folds
   # OUTPUT: vector of alpha coefficients (length R)
 
-  n = length(y); R = length(M_powers)
+  n = length(y)
 
   # sample a random partition of 1:n into n_folds subsets
   fold_id = sample.int(n_folds, size = n, replace = TRUE)
@@ -26,18 +26,18 @@ est_weights_lda_cv = function(M_powers, y, pos, neg, n_folds = 3L){
     y_cv = y; y_cv[ind] = 0
 
     # compute X
-    X = do.call(cbind,
-                lapply(M_powers, function(B){B %*% y_cv})
-    )
+    X = matrix(0, nrow = n, ncol = R)
+    X[,1L] = as.vector(M %*% y_cv)
+    for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
 
-    # compute cov, allowing for sparse X
+    # compute cov
     # uses only nodes in this fold but not in the outer fold
-    C = cov_sparse(X[c(ind_test_pos, ind_test_neg),])
+    C = cov(X[c(ind_test_pos, ind_test_neg),])
 
     # compute averages for covariates in pos and neg sets
     # uses only nodes in this fold but not in the outer fold
-    x_p = Matrix::colMeans(X[ind_test_pos,])
-    x_n = Matrix::colMeans(X[ind_test_neg,])
+    x_p = colMeans(X[ind_test_pos,])
+    x_n = colMeans(X[ind_test_neg,])
     alpha_mat[,k] = solve(C) %*% (x_p - x_n) # compute alpha
 
   }

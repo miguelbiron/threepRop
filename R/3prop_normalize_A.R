@@ -32,9 +32,9 @@ normalize_A = function(A, M_type){
 
   if(!Matrix::isSymmetric(A)){stop("Matrix A is not symmetric.")}
 
-  # remove diagonal elements
+  # copy A and remove diagonal elements if present
   M = A
-  Matrix::diag(M) = 0
+  if(max(abs(Matrix::diag(M))) > 0){ Matrix::diag(M) = 0 }
 
   # normalize using chosen method
   switch(

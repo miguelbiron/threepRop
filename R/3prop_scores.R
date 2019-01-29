@@ -42,11 +42,6 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
   n = length(y)
   ind_all = seq_len(n)
 
-  # compute list of M powers
-  M_powers = vector(mode = "list", length = R)
-  M_powers[[1L]] = M
-  for(r in 2L:R){ M_powers[[r]] = M %*% M_powers[[r-1L]]}
-
   # sample a random partition of 1:n into n_folds subsets
   fold_id = sample.int(n_folds, size = n, replace = TRUE)
 
@@ -67,7 +62,9 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
 
     # estimate coefficients
     alpha = est_weights_lda_cv(
-      M_powers = M_powers,
+      # M_powers = M_powers,
+      M        = M,
+      R        = R,
       y        = y_cv,
       pos      = pos,
       neg      = neg,
@@ -76,9 +73,9 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 
     # compute X
-    X = do.call(cbind,
-                lapply(M_powers, FUN = function(B){B %*% y_cv})
-                )
+    X = matrix(0, nrow = n, ncol = R)
+    X[,1L] = as.vector(M %*% y_cv)
+    for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
 
     # compute f_score and convert to vector
     f_scores = as.vector(X %*% alpha_mat[, j])
