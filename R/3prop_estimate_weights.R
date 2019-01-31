@@ -1,9 +1,10 @@
-est_weights_lda_cv = function(M, R, y, pos, neg, n_folds = 3L){
+est_weights_lda_cv = function(M, R, y, pos, neg, n_folds, reg){
   # M: sparseMatrix of size N times N
   # y : labels in {0,1}, with components of outer CV zeroed
   # pos: indices of positive instances in y which are not in the outer CV fold
   # neg: indices of non-positive instances which are not in the outer CV fold
   # n_folds: number of CV folds
+  # reg: small positive number to ensure positive definitiness of cov matrix
   # OUTPUT: vector of alpha coefficients (length R)
 
   n = length(y)
@@ -47,8 +48,8 @@ est_weights_lda_cv = function(M, R, y, pos, neg, n_folds = 3L){
       x_n = colMeans(X[ind_test_neg,])
     }
 
-    # compute alpha
-    alpha_mat[,k] = solve(C) %*% (x_p - x_n)
+    # compute alpha with regularized covariance matrix
+    alpha_mat[,k] = solve(C+reg*diag(R)) %*% (x_p - x_n)
 
   }
   return(rowMeans(alpha_mat, na.rm = TRUE))

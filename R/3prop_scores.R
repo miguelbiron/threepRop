@@ -18,6 +18,7 @@
 #' @param R maximum length of the random walks to consider. The default 3 is the
 #' usual for 3prop.
 #' @param n_folds number of CV folds to use in both inner and outer CV loops.
+#' @param reg regularization parameter for LDA.
 #'
 #' @return A list with two elements: a matrix of size \code{R x n_folds},
 #' containing the weights estimated for each (outer) CV iteration, and a vector
@@ -33,7 +34,7 @@
 #' three degrees of propagation. \emph{PloS one, 7}(12), e51947.
 #'
 #' @export
-three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
+three_prop_cv = function(M, y, R = 3L, n_folds = 3L, reg = 1e-09){
 
   # we only work with sparse objects
   stopifnot(is(M, "sparseMatrix") && is(y, "sparseVector"))
@@ -68,7 +69,8 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L){
       y        = y_cv,
       pos      = pos,
       neg      = neg,
-      n_folds  = n_folds
+      n_folds  = n_folds,
+      reg      = reg
     )
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 

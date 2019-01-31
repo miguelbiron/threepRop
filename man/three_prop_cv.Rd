@@ -4,7 +4,7 @@
 \alias{three_prop_cv}
 \title{Estimate 3prop weights using double cross-validation}
 \usage{
-three_prop_cv(M, y, R = 3L, n_folds = 3L)
+three_prop_cv(M, y, R = 3L, n_folds = 3L, reg = 1e-09)
 }
 \arguments{
 \item{M}{normalized affinity matrix, as returned by \code{normalize_A()}, of
@@ -17,6 +17,8 @@ size \code{N x N}. Must be of class \code{sparseMatrix}.}
 usual for 3prop.}
 
 \item{n_folds}{number of CV folds to use in both inner and outer CV loops.}
+
+\item{reg}{regularization parameter for LDA.}
 }
 \value{
 A list with two elements: a matrix of size \code{R x n_folds},
