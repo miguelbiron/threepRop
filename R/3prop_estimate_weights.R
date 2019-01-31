@@ -36,11 +36,21 @@ est_weights_lda_cv = function(M, R, y, pos, neg, n_folds = 3L){
 
     # compute averages for covariates in pos and neg sets
     # uses only nodes in this fold but not in the outer fold
-    x_p = colMeans(X[ind_test_pos,])
-    x_n = colMeans(X[ind_test_neg,])
-    alpha_mat[,k] = solve(C) %*% (x_p - x_n) # compute alpha
+    if(length(ind_test_pos)==1L){
+      x_p = X[ind_test_pos,]
+    } else{
+      x_p = colMeans(X[ind_test_pos,])
+    }
+    if(length(ind_test_neg)==1L){
+      x_n = X[ind_test_neg,]
+    } else{
+      x_n = colMeans(X[ind_test_neg,])
+    }
+
+    # compute alpha
+    alpha_mat[,k] = solve(C) %*% (x_p - x_n)
 
   }
-  return(rowMeans(alpha_mat))
+  return(rowMeans(alpha_mat, na.rm = TRUE))
 }
 
