@@ -4,7 +4,8 @@
 \alias{three_prop_cv}
 \title{Estimate 3prop weights using double cross-validation}
 \usage{
-three_prop_cv(M, y, R = 3L, n_folds = 3L, reg = 1e-09)
+three_prop_cv(M, y, R = 3L, n_folds = 3L, reg = 1e-09,
+  method = "LDA")
 }
 \arguments{
 \item{M}{normalized affinity matrix, as returned by \code{normalize_A()}, of
@@ -19,6 +20,9 @@ usual for 3prop.}
 \item{n_folds}{number of CV folds to use in both inner and outer CV loops.}
 
 \item{reg}{regularization parameter for LDA.}
+
+\item{method}{string for method to compute the coefficients. Can be "LDA"
+(default) or "Ridge". Both use the parameter \code{reg}.}
 }
 \value{
 A list with two elements: a matrix of size \code{R x n_folds},
@@ -39,9 +43,10 @@ Additionally, the function returns computes the area under the ROC curve
 (AUROC) for every fold in the outer CV loop.
 }
 \examples{
-sim_SBM = simulate_simple_SBM(25L, 0.2, 0.001, 0.25)
+sim_SBM = simulate_simple_SBM(N = 2500L, p_1 = 0.2, D = 0.04, R = 0.25)
 M = normalize_A(sim_SBM$A, "asym")
 three_prop_cv(M=M, y=sim_SBM$y)
+three_prop_cv(M=M, y=sim_SBM$y, method = "Ridge")
 
 }
 \references{

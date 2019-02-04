@@ -19,22 +19,25 @@
 #' usual for 3prop.
 #' @param n_folds number of CV folds to use in both inner and outer CV loops.
 #' @param reg regularization parameter for LDA.
+#' @param method string for method to compute the coefficients. Can be "LDA"
+#' (default) or "Ridge". Both use the parameter \code{reg}.
 #'
 #' @return A list with two elements: a matrix of size \code{R x n_folds},
 #' containing the weights estimated for each (outer) CV iteration, and a vector
 #' of length \code{n_folds} containing the AUROC for each such iteration.
 #'
 #' @examples
-#' sim_SBM = simulate_simple_SBM(25L, 0.2, 0.001, 0.25)
+#' sim_SBM = simulate_simple_SBM(N = 2500L, p_1 = 0.2, D = 0.04, R = 0.25)
 #' M = normalize_A(sim_SBM$A, "asym")
 #' three_prop_cv(M=M, y=sim_SBM$y)
+#' three_prop_cv(M=M, y=sim_SBM$y, method = "Ridge")
 #'
 #' @references
 #' Mostafavi, S., Goldenberg, A., & Morris, Q. (2012). Labeling nodes using
 #' three degrees of propagation. \emph{PloS one, 7}(12), e51947.
 #'
 #' @export
-three_prop_cv = function(M, y, R = 3L, n_folds = 3L, reg = 1e-09){
+three_prop_cv = function(M, y, R = 3L, n_folds = 3L, reg = 1e-09, method = "LDA"){
 
   # we only work with sparse objects
   stopifnot(is(M, "sparseMatrix") && is(y, "sparseVector"))
@@ -62,15 +65,15 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L, reg = 1e-09){
     neg = setdiff(ind_all, c(pos, ind)) # non-positives not in current test set
 
     # estimate coefficients
-    alpha = est_weights_lda_cv(
-      # M_powers = M_powers,
+    alpha = est_weights_cv(
       M        = M,
       R        = R,
       y        = y_cv,
       pos      = pos,
       neg      = neg,
       n_folds  = n_folds,
-      reg      = reg
+      reg      = reg,
+      method   = method
     )
     alpha_mat[, j] = alpha / sum(abs(alpha)) # normalize and store
 
