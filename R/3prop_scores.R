@@ -80,7 +80,9 @@ three_prop_cv = function(M, y, R = 3L, n_folds = 3L, reg = 1e-09, method = "LDA"
     # compute X
     X = matrix(0, nrow = n, ncol = R)
     X[,1L] = as.vector(M %*% y_cv)
-    for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
+    if(R >= 2L){
+      for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
+    }
 
     # compute f_score and convert to vector
     f_scores = as.vector(X %*% alpha_mat[, j])

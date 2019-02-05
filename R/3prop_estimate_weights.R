@@ -30,25 +30,27 @@ est_weights_cv = function(M, R, y, pos, neg, n_folds, reg, method){
     # compute X
     X = matrix(0, nrow = n, ncol = R)
     X[,1L] = as.vector(M %*% y_cv)
-    for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
+    if(R >= 2L){
+      for(r in 2L:R){ X[,r] = as.vector(M %*% X[,r-1L]) }
+    }
 
     # estimate alpha using chosen method
     if(method == "LDA"){
       # compute cov
       # uses only nodes in this fold but not in the outer fold
-      C = cov(X[c(ind_test_pos, ind_test_neg),])
+      C = var(X[c(ind_test_pos, ind_test_neg), , drop = FALSE])
 
       # compute averages for covariates in pos and neg sets
       # uses only nodes in this fold but not in the outer fold
       if(length(ind_test_pos)==1L){
-        x_p = X[ind_test_pos,]
+        x_p = X[ind_test_pos, , drop = FALSE]
       } else{
-        x_p = colMeans(X[ind_test_pos,])
+        x_p = colMeans(X[ind_test_pos, , drop = FALSE])
       }
       if(length(ind_test_neg)==1L){
-        x_n = X[ind_test_neg,]
+        x_n = X[ind_test_neg, , drop = FALSE]
       } else{
-        x_n = colMeans(X[ind_test_neg,])
+        x_n = colMeans(X[ind_test_neg, , drop = FALSE])
       }
 
       # compute alpha with regularized covariance matrix
@@ -57,7 +59,7 @@ est_weights_cv = function(M, R, y, pos, neg, n_folds, reg, method){
     } else if(method == "Ridge"){
 
       ind_test = c(ind_test_pos, ind_test_neg)
-      X_t = X[ind_test,]
+      X_t = X[ind_test, , drop = FALSE]
       y_t = as.vector(y[ind_test]) # makes no sense to use y_cv (all would be 0)
       A = solve(crossprod(X_t)+reg*diag(R))
       B = crossprod(X_t, y_t)
